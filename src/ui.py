@@ -1,36 +1,36 @@
 import pygame
-from .settings import *
+from .settings import (
+    WINDOW_WIDTH, WINDOW_HEIGHT, BLUE, WHITE, BLACK,
+    FONT
+)
 
 class Button:
-    def __init__(self, x, y, width, height, text, color=MENU_BLUE):
+    def __init__(self, x, y, width, height, text, action=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
-        self.color = color
+        self.action = action
+        self.color = (100, 100, 100)  # Default gray color
+        self.hover_color = (150, 150, 150)  # Lighter gray for hover
+        self.text_color = WHITE
         self.font = FONT
-        self.is_hovered = False
 
     def draw(self, surface):
-        color = (min(self.color[0] + 30, 255), 
-                min(self.color[1] + 30, 255), 
-                min(self.color[2] + 30, 255)) if self.is_hovered else self.color
+        # Draw button background
+        color = self.hover_color if self.rect.collidepoint(pygame.mouse.get_pos()) else self.color
         pygame.draw.rect(surface, color, self.rect)
-        pygame.draw.rect(surface, WHITE, self.rect, 2)
+        pygame.draw.rect(surface, WHITE, self.rect, 2)  # White border
         
-        text_surface = self.font.render(self.text, True, WHITE)
+        # Draw button text
+        text_surface = self.font.render(self.text, True, self.text_color)
         text_rect = text_surface.get_rect(center=self.rect.center)
         surface.blit(text_surface, text_rect)
 
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEMOTION:
-            self.is_hovered = self.rect.collidepoint(event.pos)
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if self.is_hovered:
-                return True
-        return False
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
 
 def draw_menu(screen, buttons):
+    # Draw background
     screen.fill(BLUE)
-    screen.blit(BACKGROUND_IMAGE, (0, 0))
     
     # Draw title
     title = FONT.render("Sonchi's Adventure", True, WHITE)
@@ -41,29 +41,53 @@ def draw_menu(screen, buttons):
     for button in buttons:
         button.draw(screen)
 
-def draw_pause_menu(screen, buttons):
-    # Draw buttons
-    for button in buttons:
-        button.draw(screen)
-
-def draw_game_over(screen):
-    screen.fill(BLACK)
-    game_over_text = FONT.render("Game Over", True, RED)
-    continue_text = FONT.render("Press ENTER to return to menu", True, WHITE)
+def draw_pause_menu(screen):
+    # Draw semi-transparent overlay
+    overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+    overlay.set_alpha(128)
+    overlay.fill(BLACK)
+    screen.blit(overlay, (0, 0))
     
-    game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50))
+    # Draw pause text
+    pause_text = FONT.render("PAUSED", True, WHITE)
+    pause_rect = pause_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2))
+    screen.blit(pause_text, pause_rect)
+    
+    # Draw continue text
+    continue_text = FONT.render("Press ESC to continue", True, WHITE)
     continue_rect = continue_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 50))
-    
-    screen.blit(game_over_text, game_over_rect)
     screen.blit(continue_text, continue_rect)
 
-def draw_level_complete(screen, level):
-    screen.fill(BLACK)
-    complete_text = FONT.render(f"Level {level} Complete!", True, GREEN)
-    continue_text = FONT.render("Press ENTER to continue", True, WHITE)
+def draw_game_over(screen):
+    # Draw semi-transparent overlay
+    overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+    overlay.set_alpha(128)
+    overlay.fill(BLACK)
+    screen.blit(overlay, (0, 0))
     
-    complete_rect = complete_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50))
-    continue_rect = continue_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 50))
+    # Draw game over text
+    game_over_text = FONT.render("GAME OVER", True, WHITE)
+    game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2))
+    screen.blit(game_over_text, game_over_rect)
     
+    # Draw restart text
+    restart_text = FONT.render("Press ENTER to restart", True, WHITE)
+    restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 50))
+    screen.blit(restart_text, restart_rect)
+
+def draw_level_complete(screen):
+    # Draw semi-transparent overlay
+    overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+    overlay.set_alpha(128)
+    overlay.fill(BLACK)
+    screen.blit(overlay, (0, 0))
+    
+    # Draw level complete text
+    complete_text = FONT.render("LEVEL COMPLETE!", True, WHITE)
+    complete_rect = complete_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2))
     screen.blit(complete_text, complete_rect)
+    
+    # Draw continue text
+    continue_text = FONT.render("Press ENTER to continue", True, WHITE)
+    continue_rect = continue_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 50))
     screen.blit(continue_text, continue_rect) 

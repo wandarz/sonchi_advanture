@@ -25,6 +25,7 @@ def load_level(level_num):
     enemies = pygame.sprite.Group()
     coins = pygame.sprite.Group()
     level_end = None
+    all_sprites = pygame.sprite.Group()
 
     # Load platforms
     for platform_data in level_data.get('platforms', []):
@@ -35,20 +36,20 @@ def load_level(level_num):
             platform_data['height']
         )
         platforms.add(platform)
+        all_sprites.add(platform)
 
     # Load enemies
-    for enemy_data in level_data.get('enemies', []):
-        enemy = Enemy(
-            enemy_data['x'],
-            enemy_data['y'],
-            enemy_data.get('type', 'basic')
-        )
-        enemies.add(enemy)
+    if 'enemy_spawns' in level_data:
+        for enemy_data in level_data['enemy_spawns']:
+            enemy = Enemy(enemy_data['x'], enemy_data['y'], enemy_data['type'])
+            enemies.add(enemy)
+            all_sprites.add(enemy)
 
     # Load coins
     for coin_data in level_data.get('coins', []):
         coin = Coin(coin_data['x'], coin_data['y'])
         coins.add(coin)
+        all_sprites.add(coin)
 
     # Load level end position
     if 'end_position' in level_data:
@@ -56,11 +57,13 @@ def load_level(level_num):
             level_data['end_position']['x'],
             level_data['end_position']['y']
         )
+        all_sprites.add(level_end)
 
     return {
         'name': level_data.get('name', f'Level {level_num}'),
         'platforms': platforms,
         'enemies': enemies,
         'coins': coins,
-        'level_end': level_end
+        'level_end': level_end,
+        'all_sprites': all_sprites
     } 

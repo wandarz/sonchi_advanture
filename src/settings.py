@@ -34,8 +34,8 @@ PROJECTILE_SPEED = 10
 PROJECTILE_SIZE = 10
 
 # Enemy properties
-ENEMY_SPEED = 3
-ENEMY_SIZE = 40
+ENEMY_SPEED = 2
+ENEMY_SIZE = 80
 
 # Coin properties
 COIN_SIZE = 30
@@ -51,5 +51,5 @@ LEVEL_COMPLETE = 4
 FONT = pygame.font.Font(None, 36)
 
 # Load background image
-BACKGROUND_IMAGE = pygame.image.load('background.png')
-BACKGROUND_IMAGE = pygame.transform.scale(BACKGROUND_IMAGE, (WINDOW_WIDTH * 3, WINDOW_HEIGHT)) 
+background_image = pygame.image.load('images/background.png')
+background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH * 3, WINDOW_HEIGHT)) 

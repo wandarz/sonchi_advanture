@@ -1,6 +1,10 @@
 import pygame
 import sys
-from .settings import *
+from .settings import (
+    WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BLUE, WHITE, BLACK,
+    MENU, PLAYING, PAUSED, GAME_OVER, LEVEL_COMPLETE,
+    FONT, background_image
+)
 from .sprites import Player, Heart
 from .ui import Button, draw_menu, draw_pause_menu, draw_game_over, draw_level_complete
 from .level_manager import load_level, get_max_level
@@ -12,26 +16,18 @@ def main():
     pygame.display.set_caption("Sonchi's Adventure")
     clock = pygame.time.Clock()
 
-    # Game state
+    # Initialize game state
     game_state = MENU
     current_level = 1
     max_level = get_max_level()
-    
-    # Create sprite groups
-    all_sprites = pygame.sprite.Group()
-    platforms = pygame.sprite.Group()
-    enemies = pygame.sprite.Group()
-    projectiles = pygame.sprite.Group()
-    coins = pygame.sprite.Group()
-    hearts = pygame.sprite.Group()
-    
-    # Create player
     player = None
+    projectiles = pygame.sprite.Group()
+    all_sprites = pygame.sprite.Group()
     
-    # Create buttons
+    # Create menu buttons
     menu_buttons = [
-        Button(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2, 200, 50, "Start Game"),
-        Button(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2 + 70, 200, 50, "Quit")
+        Button(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2, 200, 50, "Start Game", lambda: setattr(sys.modules[__name__], 'game_state', PLAYING)),
+        Button(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2 + 70, 200, 50, "Quit", pygame.quit)
     ]
     
     pause_buttons = [
@@ -43,6 +39,13 @@ def main():
     pygame.mixer.music.load('sounds/background.wav')
     pygame.mixer.music.play(-1)  # Loop indefinitely
 
+    # Load first level
+    level_data = load_level(current_level)
+    platforms = level_data['platforms']
+    enemies = level_data['enemies']
+    coins = level_data['coins']
+    level_end = level_data['level_end']
+    
     # Main game loop
     running = True
     while running:
@@ -51,34 +54,16 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             
-            if game_state == MENU:
-                for button in menu_buttons:
-                    if button.handle_event(event):
-                        if button.text == "Start Game":
-                            game_state = PLAYING
-                            current_level = 1
-                            level_data = load_level(current_level)
-                            if level_data:
-                                platforms = level_data['platforms']
-                                enemies = level_data['enemies']
-                                coins = level_data['coins']
-                                level_end = level_data['level_end']
+            elif game_state == MENU:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for button in menu_buttons:
+                        if button.is_clicked(event.pos):
+                            if button.text == "Start Game":
+                                game_state = PLAYING
                                 player = Player(100, 500)
-                                all_sprites = pygame.sprite.Group()
                                 all_sprites.add(player)
-                                all_sprites.add(platforms)
-                                all_sprites.add(enemies)
-                                all_sprites.add(coins)
-                                if level_end:
-                                    all_sprites.add(level_end)
-                                # Create hearts
-                                hearts = pygame.sprite.Group()
-                                for i in range(player.lives):
-                                    heart = Heart(30 + i * 40, 30)
-                                    hearts.add(heart)
-                                all_sprites.add(hearts)
-                        elif button.text == "Quit":
-                            running = False
+                            elif button.text == "Quit":
+                                running = False
             
             elif game_state == PLAYING:
                 if event.type == pygame.KEYDOWN:
@@ -95,6 +80,8 @@ def main():
                                 all_sprites.add(projectile)
             
             elif game_state == PAUSED:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    game_state = PLAYING
                 for button in pause_buttons:
                     if button.handle_event(event):
                         if button.text == "Resume":
@@ -103,18 +90,28 @@ def main():
                             game_state = MENU
             
             elif game_state == GAME_OVER:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    game_state = MENU
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        # Restart the current level
+                        level_data = load_level(current_level)
+                        platforms = level_data['platforms']
+                        enemies = level_data['enemies']
+                        coins = level_data['coins']
+                        level_end = level_data['level_end']
+                        player = Player(100, 500)
+                        all_sprites = pygame.sprite.Group()
+                        all_sprites.add(player)
+                        projectiles = pygame.sprite.Group()
+                        game_state = PLAYING
             
             elif game_state == LEVEL_COMPLETE:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    current_level += 1
-                    if current_level > max_level:
-                        game_state = MENU
-                    else:
-                        game_state = PLAYING
-                        level_data = load_level(current_level)
-                        if level_data:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        current_level += 1
+                        if current_level > max_level:
+                            game_state = MENU
+                        else:
+                            level_data = load_level(current_level)
                             platforms = level_data['platforms']
                             enemies = level_data['enemies']
                             coins = level_data['coins']
@@ -122,20 +119,12 @@ def main():
                             player = Player(100, 500)
                             all_sprites = pygame.sprite.Group()
                             all_sprites.add(player)
-                            all_sprites.add(platforms)
-                            all_sprites.add(enemies)
-                            all_sprites.add(coins)
-                            if level_end:
-                                all_sprites.add(level_end)
-                            # Create hearts
-                            hearts = pygame.sprite.Group()
-                            for i in range(player.lives):
-                                heart = Heart(30 + i * 40, 30)
-                                hearts.add(heart)
-                            all_sprites.add(hearts)
+                            projectiles = pygame.sprite.Group()
+                            game_state = PLAYING
 
         # Update
         if game_state == PLAYING and player is not None:
+            # Update game objects
             player.update(platforms, projectiles, enemies, coins, level_end)
             enemies.update(platforms)
             projectiles.update(enemies)
@@ -149,23 +138,42 @@ def main():
                 game_state = GAME_OVER
 
         # Draw
-        screen.fill(BLUE)
-        screen.blit(BACKGROUND_IMAGE, (0, 0))
-        
         if game_state == MENU:
             draw_menu(screen, menu_buttons)
-        elif game_state == PLAYING:
-            all_sprites.draw(screen)
-            # Draw coin counter
-            coin_text = FONT.render(f"Coins: {player.coins if player else 0}", True, WHITE)
-            screen.blit(coin_text, (WINDOW_WIDTH - 150, 30))
+        elif game_state == PLAYING and player is not None:
+            # Draw background with parallax effect
+            screen.blit(background_image, (-player.camera_x * 0.5, 0))
+            
+            # Draw all sprites with camera offset
+            for platform in platforms:
+                screen.blit(platform.image, (platform.rect.x - player.camera_x, platform.rect.y))
+            for projectile in projectiles:
+                screen.blit(projectile.image, (projectile.rect.x - player.camera_x, projectile.rect.y))
+            for enemy in enemies:
+                screen.blit(enemy.image, (enemy.rect.x - player.camera_x, enemy.rect.y))
+            for coin in coins:
+                screen.blit(coin.image, (coin.rect.x - player.camera_x, coin.rect.y))
+            if level_end:
+                screen.blit(level_end.image, (level_end.rect.x - player.camera_x, level_end.rect.y))
+            
+            # Draw player and hearts
+            screen.blit(player.image, (player.rect.x - player.camera_x, player.rect.y))
+            player.hearts.draw(screen)
+            
+            # Draw UI elements (these don't move with camera)
+            coin_text = FONT.render(f'Coins: {player.coins}', True, WHITE)
+            screen.blit(coin_text, (WINDOW_WIDTH - 150, 10))
+            
+            level_text = FONT.render(f'Level {current_level}', True, WHITE)
+            screen.blit(level_text, (WINDOW_WIDTH // 2 - 50, 10))
         elif game_state == PAUSED:
-            all_sprites.draw(screen)
+            # Draw game in background
+            screen.fill(BLUE)
             draw_pause_menu(screen, pause_buttons)
         elif game_state == GAME_OVER:
             draw_game_over(screen)
         elif game_state == LEVEL_COMPLETE:
-            draw_level_complete(screen, current_level)
+            draw_level_complete(screen)
 
         pygame.display.flip()
         clock.tick(FPS)
