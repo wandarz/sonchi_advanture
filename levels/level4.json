@@ -1,0 +1,27 @@
+{
+    "name": "Level 4 - The Challenge",
+    "platforms": [
+        {"x": 0, "y": 680, "width": 3840, "height": 40},
+        {"x": 200, "y": 550, "width": 150, "height": 20},
+        {"x": 400, "y": 450, "width": 150, "height": 20},
+        {"x": 600, "y": 350, "width": 150, "height": 20},
+        {"x": 800, "y": 250, "width": 150, "height": 20},
+        {"x": 1000, "y": 350, "width": 150, "height": 20},
+        {"x": 1200, "y": 450, "width": 150, "height": 20},
+        {"x": 1400, "y": 550, "width": 150, "height": 20},
+        {"x": 1600, "y": 450, "width": 150, "height": 20},
+        {"x": 1800, "y": 350, "width": 150, "height": 20},
+        {"x": 2000, "y": 250, "width": 150, "height": 20}
+    ],
+    "enemy_spawns": [
+        {"x": 300, "y": 200, "type": "basic"},
+        {"x": 500, "y": 300, "type": "basic"},
+        {"x": 700, "y": 200, "type": "basic"},
+        {"x": 900, "y": 300, "type": "basic"},
+        {"x": 1100, "y": 200, "type": "basic"},
+        {"x": 1300, "y": 300, "type": "basic"},
+        {"x": 1500, "y": 200, "type": "basic"},
+        {"x": 1700, "y": 300, "type": "basic"},
+        {"x": 1900, "y": 200, "type": "basic"}
+    ]
+} 

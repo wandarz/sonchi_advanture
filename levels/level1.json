@@ -1,0 +1,24 @@
+{
+    "name": "Level 1 - The Beginning",
+    "platforms": [
+        {"x": 0, "y": 680, "width": 3840, "height": 40},
+        {"x": 300, "y": 580, "width": 200, "height": 20},
+        {"x": 600, "y": 480, "width": 200, "height": 20},
+        {"x": 900, "y": 580, "width": 200, "height": 20},
+        {"x": 1200, "y": 480, "width": 200, "height": 20},
+        {"x": 1500, "y": 580, "width": 200, "height": 20}
+    ],
+    "enemy_spawns": [
+        {"x": 400, "y": 300, "type": "basic"},
+        {"x": 800, "y": 200, "type": "basic"},
+        {"x": 1200, "y": 300, "type": "basic"}
+    ],
+    "coins": [
+        {"x": 350, "y": 500},
+        {"x": 650, "y": 400},
+        {"x": 950, "y": 500},
+        {"x": 1250, "y": 400},
+        {"x": 1550, "y": 500}
+    ],
+    "end_position": {"x": 1800, "y": 580}
+} 
